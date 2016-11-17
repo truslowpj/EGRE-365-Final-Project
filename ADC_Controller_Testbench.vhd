@@ -65,22 +65,21 @@ architecture behavior of ADC_Controller_Testbench is
   clock : process(CLK_sig)
   begin
     CLK_sig <= (NOT CLK_sig) after 25 NS;
-  end process clock;
-
+  end process clock; 
+  
   --------------------------------------------------------
   ----
-  -- ProcessName: start_clock
+  -- ComponentName: Clock_Divider
   --
-  -- This process is responsible for generating the START 
-  -- signal for the ADC controller. This signal is driven
-  -- by a clock divider which is connected to the same
-  -- clock that drives the ADC controller and TWI controller.  
+  -- This is the clock divider component used to drive the 
+  -- START input on the ADC controller. This component
+  -- slows down the system clock used to drive the clocks
+  -- for both the ADC controller and TWI controller.
   --------------------------------------------------------
-  ----  
-  start_clock : process (START_sig)
-  begin
-    START_sig <= (NOT START_sig) after 50 ns;
-   end process start_clock;
+  ----
+  Clcok_Divier_DUT : entity work.clock_divider(behavior)
+    port map(mclk => CLK_sig,
+                   sclk => START_sig);
   
 	--------------------------------------------------------
   ----
