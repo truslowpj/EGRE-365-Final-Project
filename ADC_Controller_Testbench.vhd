@@ -5,19 +5,37 @@ entity ADC_Controller_Testbench is
 end ADC_Controller_Testbench;
 
 architecture behavior of ADC_Controller_Testbench is
-    
+
+  --------------------------------------------------------
+  ----
+  -- ProcedureName: waitclocks
+  --
+  -- This procedure halts a process execution for a given
+  -- number of clock cycles. The clock cycle used in this
+  -- procedure is falling-edge.
+  --------------------------------------------------------
+  ----
+  procedure waitclocks(signal clock : std_logic;
+                       N : INTEGER) is
+		begin
+			for i in 1 to N loop
+				wait until clock'event and clock='0';	-- wait on falling edge
+			end loop;
+	end waitclocks;
+
   --------------------------------------------------------
   -- ADC controller specific signals. These signals are
   -- specific to the ADC controller.
-  --------------------------------------------------------
-  signal ADC_CLK_sig : std_logic;
-  signal RST	: std_logic;
-  signal START : std_logic;
+  --------------------------------------------------------  
+  signal RST_sig	: std_logic;
+  signal START_sig : std_logic := '0';
+  signal DATA_OUT_sig : std_logic_vector(15 downto 0);
   
   --------------------------------------------------------
   -- Intermediate signals. These signals are between the
   -- ADC controller and the TWICtl.
   --------------------------------------------------------
+  signal CLK_sig : std_logic := '0';
   signal SRST_sig : std_logic;
   signal STB_I_sig : std_logic;
   signal MSG_I_sig : std_logic;
@@ -31,7 +49,6 @@ architecture behavior of ADC_Controller_Testbench is
   -- TWICtl specific signals. These signals are specific to
   -- the TWI controller.
   --------------------------------------------------------
-  signal TWICtl_CLK_sig : std_logic;
   signal SDA_sig : std_logic;
   signal SCL_sig : std_logic;     
   
@@ -39,31 +56,31 @@ architecture behavior of ADC_Controller_Testbench is
 	
 	--------------------------------------------------------
   ----
-  -- ProcessName: TWICtl_clock
+  -- ProcessName: clock
   --
   -- This process is responsible for generating the clock
-  -- signal for the TWI controller. This clock should be
-  -- faster than the ADC controller clock.
+  -- signal for the TWI controller and the ADC controller.
   --------------------------------------------------------
   ----
-	process TWICtl_clock(TWICtl_CLK_sig)
+  clock : process(CLK_sig)
   begin
-    TWICtl_CLK_sig <= not TWICtl_CLK_sig after 50ns;
-  end process;
+    CLK_sig <= (NOT CLK_sig) after 25 NS;
+  end process clock;
 
   --------------------------------------------------------
   ----
-  -- ProcessName: ADC_clock
+  -- ProcessName: start_clock
   --
-  -- This process is responsible for generating the clock
-  -- signal for the ADC controller. This clock should be 
-  -- slower than the TWI controller clock.
+  -- This process is responsible for generating the START 
+  -- signal for the ADC controller. This signal is driven
+  -- by a clock divider which is connected to the same
+  -- clock that drives the ADC controller and TWI controller.  
   --------------------------------------------------------
   ----  
-  process ADC_clock(ADC_CLK_sig)
+  start_clock : process (START_sig)
   begin
-    ADC_CLK_sig <= not ADC_CLK_sig after 25ns;
-   end process;
+    START_sig <= (NOT START_sig) after 50 ns;
+   end process start_clock;
   
 	--------------------------------------------------------
   ----
@@ -80,11 +97,12 @@ architecture behavior of ADC_Controller_Testbench is
                   D_I => D_I_sig,
                   DONE_O => DONE_O_sig,
                   ERR_O => ERR_O_sig,
-                  CLK => ADC_CLK_sig,
-                  SRST => STRT_sig,
+                  CLK => CLK_sig,
+                  SRST => SRST_sig,
                   RST => RST_sig,
                   DATA_OUT => DATA_OUT_sig,
-                  START => START_sig);
+                  START => START_sig,
+                  D_O => D_O_sig);
   
 	--------------------------------------------------------
   ----
@@ -102,8 +120,8 @@ architecture behavior of ADC_Controller_Testbench is
                   D_I => D_I_sig,
                   DONE_O => DONE_O_sig,
                   ERR_O => ERR_O_sig,
-                  CLK => TWICtl_CLK_sig,
-                  SRST => STRT_sig,                       
+                  CLK => CLK_sig,
+                  SRST => SRST_sig,                       
                   SDA => SDA_sig,                        
                   SCL => SCL_sig);
   
@@ -183,4 +201,4 @@ architecture behavior of ADC_Controller_Testbench is
 
 	end process slave_stimulus;
 
-end architecture;
+end Behavior;
