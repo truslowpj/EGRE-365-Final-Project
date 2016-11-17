@@ -13,13 +13,16 @@ entity Controller is
            SRST   : out std_logic;
 					 RST		: in std_logic;
 					 DATA_OUT: out std_logic_vector (15 downto 0);
-					 START 	: in std_logic);
+					 START 	: in std_logic;
+					 STATE_DEBUG	:	out integer range 0 to 20;
+					 count : out integer range 0 to 510);
 	end Controller;
 	
 architecture SIMPLE of Controller is
 	type state_type is (ready, config_Strobe, config_strobe_hold, config_Wait, address_strobe, address_strobe_hold, address_wait, 
 													stb_hold_wait, read_msbyte, read_msbyte_wait, read_lsbyte);
 	Signal current_state, next_state : state_type;
+	Signal count_next, count_last : integer range 0 to 510;
 	
 	constant addrAD2	 : STD_LOGIC_VECTOR(6 downto 0) := "0101100";	-- TWI address for the ADC
   constant writeCfg	 : STD_LOGIC_VECTOR(7 downto 0) := "00100000";	-- configuration register value for the ADC - read VIN0
@@ -29,7 +32,7 @@ architecture SIMPLE of Controller is
 	constant null_2_byte : STD_LOGIC_VECTOR(15 downto 0) := "0000000000000000";
 	
 	BEGIN
-	
+
 	memory : PROCESS(clk,rst)
    BEGIN
      IF(rst='1') THEN 
@@ -39,8 +42,46 @@ architecture SIMPLE of Controller is
     END IF;  
  END PROCESS memory;
  
-nextstate : PROCESS(current_state,START, ERR_O, DONE_O)
-	VARIABLE count : integer range 0 to 510;
+debug : PROCESS(current_state, count_next, CLK)
+	BEGIN
+		IF(rising_edge(clk)) THEN
+      count_last <= count_next;
+    END IF;  
+		count <= count_last;
+	
+		CASE current_state IS
+			WHEN ready =>
+						STATE_DEBUG <= 0;
+						
+			WHEN config_STROBE =>
+						STATE_DEBUG <= 1;
+			WHEN config_strobe_hold =>
+						STATE_DEBUG <= 2;
+			WHEN config_wait =>
+						STATE_DEBUG <= 3;
+			WHEN address_strobe =>
+						STATE_DEBUG <= 4;
+			WHEN address_strobe_hold =>
+						STATE_DEBUG <= 5;
+			WHEN address_wait =>
+						STATE_DEBUG <= 6;		
+			
+			WHEN stb_hold_wait =>
+						STATE_DEBUG <= 7;
+			WHEN read_msbyte_wait =>
+						STATE_DEBUG <= 8;
+			WHEN read_msbyte =>
+						STATE_DEBUG <= 9;
+			WHEN read_lsbyte =>
+						STATE_DEBUG <= 10;
+						
+			WHEN others =>
+						STATE_DEBUG <= 11;
+			END CASE;
+			
+	END PROCESS debug; 
+ 
+nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count)
 	BEGIN
 	
 		CASE current_state IS
@@ -57,7 +98,7 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O)
 						next_state <= config_wait;
 			
 			WHEN config_wait =>
-						IF (DONE_O = '0') THEN
+						IF (falling_edge(DONE_O)) THEN
 							next_state <= address_strobe;
 						ELSE next_state <= config_wait;
 						END IF;
@@ -69,29 +110,33 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O)
 						next_state <= address_wait;
 			
 			WHEN address_wait =>
-						IF (DONE_O = '0') THEN
+						IF (falling_edge(DONE_O)) THEN
 							next_state <= stb_hold_wait;
-						ELSE next_state <= stb_hold_wait;
-							count := 0;
+						ELSE next_state <= address_wait;
+							count_next <= 0;
+						END IF;	
+
+			WHEN read_msbyte_wait =>
+						if (falling_edge(DONE_O)) THEN
+							next_state <= stb_hold_wait;			
 						END IF;						
 			
 			WHEN stb_hold_wait =>
-						IF (count = 510) THEN
+						IF (count_last >= 510) THEN
 							next_state <= read_msbyte;
-							count := 0;
+							count_next <= 0;
 						ELSE next_state <= stb_hold_wait;
-							count := count + 1;
+							count_next <= count_last + 1;
 						END IF;
 						
 			WHEN read_msbyte =>
-						if (DONE_O = '0') THEN
-							next_state <= read_lsbyte;			
-						END IF;
+							next_state <= read_lsbyte;
 						
 			WHEN read_lsbyte =>
-						if (DONE_O) = '0' THEN
+						if (falling_edge(DONE_O)) THEN
 							next_state <= ready;
-						END IF;
+						ELSE next_state <= read_lsbyte;
+						END IF;			
 						
 			WHEN others =>
 						next_state <= ready;
@@ -107,6 +152,7 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 		IF (RST) THEN
 			SRST <= '1';
 			DATA_OUT <= null_2_byte;
+		ELSE SRST <= '0';
 		END IF;
 		
 		CASE current_state IS
@@ -131,7 +177,7 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 			WHEN config_wait =>
 						MSG_I <= 	'0';
 						STB_I <=	'0';
-						A_I 	<= 	addrAD2 & read_Bit;	
+						A_I 	<= 	addrAD2 & write_Bit;	
 						D_I 	<= 	null_byte;
 			
 			WHEN address_strobe =>
