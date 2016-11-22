@@ -21,13 +21,11 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 ENTITY clock_divider is
--- use these values for high speed -----
--- 100 MHz clk, div 10 - 10.0 MHz clock
-  GENERIC(DIVISOR : positive := 10);
+-- use these values for simulation -----
+--  GENERIC(DIVISOR : positive := 100);
 ----------------------------------------
 -- use these values for synthesis ------
--- 100 MHz clk, div 20000000 - 0.5 Hz clock
---  GENERIC(DIVISOR : positive := 80000000);
+  GENERIC(DIVISOR : positive := 10000);
 -----------------------------------------
   PORT(mclk : IN  std_logic;
        sclk : OUT std_logic);

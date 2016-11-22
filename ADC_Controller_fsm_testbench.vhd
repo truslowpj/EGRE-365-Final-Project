@@ -54,6 +54,10 @@ architecture behavior of ADC_testbench is
       begin
         CLK_sig <= not CLK_sig after Tperiod/2;
     end process;
+		
+		
+		
+		
   
 	-- This process simulates the state machine that drives the TWI controller to perform the bus
 	-- master operations. These include a configuration register write, followed by a two-byte
@@ -68,17 +72,9 @@ architecture behavior of ADC_testbench is
       begin
 			
 			RESET_sig <= '1';
-			START_SIG <= '0';
 			waitclocks(CLK_sig,10);
 			RESET_sig <= '0';
-			waitclocks(CLK_sig,1200);
-			START_sig <= '1';
-			waitclocks(CLK_sig,2);
-			START_sig <= '0';
-			wait for 1 ms;
-			start_sig <= '1';
-			waitclocks(CLK_sig,2);
-			START_sig <= '0';
+
 																																												
 
         wait; -- stop the process to avoid an infinite loop
@@ -253,7 +249,10 @@ architecture behavior of ADC_testbench is
                  SCL    => SCL_sig   --TWI SCL
 								 
 );
-			 
+			DIVIDER : entity work.clock_divider(behavior)
+			generic map (Divisor => 60000) 
+			port map (mclk => clk_sig,
+								sclk => START_SIG);
  
 											-- address write (write)
  
