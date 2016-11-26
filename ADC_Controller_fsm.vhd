@@ -14,18 +14,20 @@ entity Controller is
 					 RST		: in std_logic;
 					 DATA_OUT: out std_logic_vector (15 downto 0);
 					 START 	: in std_logic;
-					 STATE_DEBUG	:	out integer range 0 to 20;
+					 STATE_DEBUG	:out std_logic_vector(3 downto 0);
 					 count : out integer range 0 to 510);
 	end Controller;
 	
-architecture SIMPLE of Controller is
+architecture simple of Controller is
 	type state_type is (ready, config_Strobe, config_strobe_hold, config_Wait, address_strobe, address_strobe_hold, address_wait, 
 													stb_hold_wait, read_msbyte, read_msbyte_wait, read_lsbyte);
 	Signal current_state, next_state : state_type;
-	Signal count_next, count_last : integer range 0 to 510;
+	Signal last_DONE_O : std_logic;
+	Signal count_next : integer range 0 to 510 := 0;
+	Signal count_last : integer range 0 to 510 := 0;
 	
-	constant addrAD2	 : STD_LOGIC_VECTOR(6 downto 0) := "0101100";	-- TWI address for the ADC
-  constant writeCfg	 : STD_LOGIC_VECTOR(7 downto 0) := "00100000";	-- configuration register value for the ADC - read VIN0
+	constant addrAD2	 : STD_LOGIC_VECTOR(6 downto 0) := "0101000";	-- TWI address for the ADC
+  constant writeCfg	 : STD_LOGIC_VECTOR(7 downto 0) := "00010000";	-- configuration register value for the ADC - read VIN0
   constant read_Bit  : STD_LOGIC := '1';
   constant write_Bit : STD_LOGIC := '0';
 	constant null_byte : STD_LOGIC_VECTOR(7 downto 0) := "00000000";
@@ -42,7 +44,7 @@ architecture SIMPLE of Controller is
     END IF;  
  END PROCESS memory;
  
-debug : PROCESS(current_state, count_next, CLK)
+debug : PROCESS(current_state, count_next, count_last, CLK)
 	BEGIN
 		IF(rising_edge(clk)) THEN
       count_last <= count_next;
@@ -51,37 +53,37 @@ debug : PROCESS(current_state, count_next, CLK)
 	
 		CASE current_state IS
 			WHEN ready =>
-						STATE_DEBUG <= 0;
+						STATE_DEBUG <= "0000";
 						
 			WHEN config_STROBE =>
-						STATE_DEBUG <= 1;
+						STATE_DEBUG <= "0001";
 			WHEN config_strobe_hold =>
-						STATE_DEBUG <= 2;
+						STATE_DEBUG <= "0010";
 			WHEN config_wait =>
-						STATE_DEBUG <= 3;
+						STATE_DEBUG <= "0011";
 			WHEN address_strobe =>
-						STATE_DEBUG <= 4;
+						STATE_DEBUG <= "0100";
 			WHEN address_strobe_hold =>
-						STATE_DEBUG <= 5;
+						STATE_DEBUG <= "0101";
 			WHEN address_wait =>
-						STATE_DEBUG <= 6;		
+						STATE_DEBUG <= "0110";		
 			
 			WHEN stb_hold_wait =>
-						STATE_DEBUG <= 7;
+						STATE_DEBUG <= "0111";
 			WHEN read_msbyte_wait =>
-						STATE_DEBUG <= 8;
+						STATE_DEBUG <= "1000";
 			WHEN read_msbyte =>
-						STATE_DEBUG <= 9;
+						STATE_DEBUG <= "1001";
 			WHEN read_lsbyte =>
-						STATE_DEBUG <= 10;
+						STATE_DEBUG <= "1010";
 						
 			WHEN others =>
-						STATE_DEBUG <= 11;
+						STATE_DEBUG <= "1011";
 			END CASE;
 			
 	END PROCESS debug; 
  
-nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count)
+nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count_last, last_DONE_O)
 	BEGIN
 	
 		CASE current_state IS
@@ -98,7 +100,7 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count)
 						next_state <= config_wait;
 			
 			WHEN config_wait =>
-						IF (falling_edge(DONE_O)) THEN
+						IF (DONE_O ='1') THEN
 							next_state <= address_strobe;
 						ELSE next_state <= config_wait;
 						END IF;
@@ -110,14 +112,14 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count)
 						next_state <= address_wait;
 			
 			WHEN address_wait =>
-						IF (falling_edge(DONE_O)) THEN
+						IF (DONE_O ='1') THEN
 							next_state <= stb_hold_wait;
 						ELSE next_state <= address_wait;
 							count_next <= 0;
 						END IF;	
 
 			WHEN read_msbyte_wait =>
-						if (falling_edge(DONE_O)) THEN
+						if (DONE_O ='1') THEN -- last_DONE_O = '1' and
 							next_state <= stb_hold_wait;			
 						END IF;						
 			
@@ -133,7 +135,7 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count)
 							next_state <= read_lsbyte;
 						
 			WHEN read_lsbyte =>
-						if (falling_edge(DONE_O)) THEN
+						if (DONE_O ='1') THEN --last_DONE_O = '1' and 
 							next_state <= ready;
 						ELSE next_state <= read_lsbyte;
 						END IF;			
@@ -149,7 +151,7 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 		
 	BEGIN
 		
-		IF (RST) THEN
+		IF (RST = '1') THEN
 			SRST <= '1';
 			DATA_OUT <= null_2_byte;
 		ELSE SRST <= '0';
@@ -227,5 +229,12 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 			END CASE;			
 			
 	END PROCESS output_process;
+	
+	DONE_O_DELAY : entity work.delay_register(simple)
+		port map (input => DONE_O,
+							output => last_DONE_O,
+							clk		=> clk);
+
 	END ARCHITECTURE SIMPLE;
+	
 			
