@@ -32,7 +32,7 @@ architecture behavior of ADC_testbench is
 	signal START_SIG	:STD_LOGIC;
 	signal slave_rdy	: STD_LOGIC;
 	
-	signal STATE_DEBUG_SIG			:integer range 0 to 20;
+	signal STATE_DEBUG_SIG			:STD_LOGIC_VECTOR (3 downto 0);
 	signal COUNT_SIG						:integer range 0 to 510;
   
   signal LED_sig    : STD_LOGIC_VECTOR(15 downto 0);	-- 16-bit "result" of 2-byte read from ADC

@@ -42,10 +42,9 @@ architecture Structural of ADC_toplevel is
 	signal A_I_sig    : STD_LOGIC_VECTOR (7 downto 0);
 	signal D_I_sig    : STD_LOGIC_VECTOR (7 downto 0);
 	signal D_O_sig    : STD_LOGIC_VECTOR (7 downto 0);
-
-	signal LED_sig    : STD_LOGIC_VECTOR (15 downto 0);
+	signal DATA_OUT_SIG : STD_LOGIC_VECTOR (15 downto 0);
+	signal state_debug_sig : STD_LOGIC_VECTOR (3 downto 0);
 	
-	signal STATE_DEBUG_SIG			:integer range 0 to 20;
 	signal COUNT_SIG						:integer range 0 to 510;
   
 	constant addrAD2	 : STD_LOGIC_VECTOR(6 downto 0) := "0101100";	-- TWI address for the ADC
@@ -68,6 +67,9 @@ architecture Structural of ADC_toplevel is
 
 	-- CPU_RESETN input is active low, so we need to invert it
 	RESET_sig <= not CPU_RESETN;
+	LED(10 downto 0) <= DATA_OUT_SIG(10 downto 0);
+	LED (15 downto 12) <= state_debug_sig(3 downto 0);
+	LED(11) <= START_SIG;
     
 	-- We want to drive the outputs to the TWI interface like we have pull up resistors attached.
 	-- So when controller indicates we're high Z, attach the signal to a weak high signal instead.
@@ -91,10 +93,10 @@ architecture Structural of ADC_toplevel is
                  CLK    => sys_clk,    -- Input Clock
                  SRST   => SRESET_sig,  -- Reset
 								 RST		=> RESET_sig,		--state machine reset
-								 DATA_OUT => LED_sig,
+								 DATA_OUT => DATA_OUT_SIG,
 								 start 	=>	START_SIG	,								
 								 Count	=>	COUNT_SIG,
-								 STATE_DEBUG => STATE_DEBUG_SIG
+								 STATE_DEBUG => state_debug_sig
 								 );
 		
     TWI_DUT : entity work.TWICtl(Behavioral)
@@ -114,7 +116,7 @@ architecture Structural of ADC_toplevel is
 								 
 );
 			DIVIDER : entity work.clock_divider(behavior)
-			generic map (Divisor => 60000) 
+			generic map (Divisor => 5000000) 
 			port map (mclk => sys_clk,
 								sclk => START_SIG);
 	

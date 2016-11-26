@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1479789508">
+<GenRun Id="synth_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1479868523">
   <File Type="RDS-PROPCONSTRS" Name="ADC_toplevel_drc_synth.rpt"/>
   <File Type="PA-TCL" Name="ADC_toplevel.tcl"/>
   <File Type="RDS-RDS" Name="ADC_toplevel.vds"/>
@@ -10,6 +10,18 @@
   <File Type="VDS-TIMING-PB" Name="ADC_toplevel_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
     <Filter Type="Srcs"/>
+    <File Path="$PPRDIR/../1_clk_delay_register.vhd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../ADC_Controller_fsm.vhd">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PPRDIR/../TWICtl.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -17,12 +29,6 @@
       </FileInfo>
     </File>
     <File Path="$PPRDIR/../clock_divider.vhd">
-      <FileInfo>
-        <Attr Name="UsedIn" Val="synthesis"/>
-        <Attr Name="UsedIn" Val="simulation"/>
-      </FileInfo>
-    </File>
-    <File Path="$PPRDIR/../ADC_Controller_fsm.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
