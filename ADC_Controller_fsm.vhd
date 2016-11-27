@@ -15,13 +15,15 @@ entity Controller is
 					 DATA_OUT: out std_logic_vector (15 downto 0);
 					 START 	: in std_logic;
 					 STATE_DEBUG	:out std_logic_vector(3 downto 0);
-					 count : out integer range 0 to 510);
+					 count : out integer range 0 to 510;
+					 DONE_O_DELAY_OUT : out std_logic);
 	end Controller;
-	
+	 
 architecture simple of Controller is
 	type state_type is (ready, config_Strobe, config_strobe_hold, config_Wait, address_strobe, address_strobe_hold, address_wait, 
-													stb_hold_wait, read_msbyte, read_msbyte_wait, read_lsbyte);
+													stb_hold_wait, read_msbyte, read_msbyte_wait, read_lsbyte, read_lsbyte_latch);
 	Signal current_state, next_state : state_type;
+	Signal current_DATA_OUT, next_DATA_OUT : std_logic_vector(15 downto 0);
 	Signal last_DONE_O : std_logic;
 	Signal count_next : integer range 0 to 510 := 0;
 	Signal count_last : integer range 0 to 510 := 0;
@@ -39,8 +41,10 @@ architecture simple of Controller is
    BEGIN
      IF(rst='1') THEN 
        current_state <= ready;
+			 current_DATA_OUT <= null_2_byte;
     ELSIF(rising_edge(clk)) THEN
       current_state <= next_state;
+			current_DATA_OUT <= next_DATA_OUT;
     END IF;  
  END PROCESS memory;
  
@@ -76,72 +80,102 @@ debug : PROCESS(current_state, count_next, count_last, CLK)
 						STATE_DEBUG <= "1001";
 			WHEN read_lsbyte =>
 						STATE_DEBUG <= "1010";
+			when read_lsbyte_latch =>
+						STATE_DEBUG <= "1011";
 						
 			WHEN others =>
-						STATE_DEBUG <= "1011";
+						STATE_DEBUG <= "1111";
 			END CASE;
 			
 	END PROCESS debug; 
  
-nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count_last, last_DONE_O)
+nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count_last, last_DONE_O, current_DATA_OUT)
 	BEGIN
-	
+		DONE_O_DELAY_OUT <= last_DONE_O;
 		CASE current_state IS
 			WHEN ready =>
 						IF (START = '1') THEN
 							next_state <= config_STROBE;
 						ELSE next_state <= ready;
 						END IF;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 						
 			WHEN config_STROBE =>
 						next_state <= config_strobe_hold;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 			
 			WHEN config_strobe_hold =>
 						next_state <= config_wait;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 			
 			WHEN config_wait =>
-						IF (DONE_O ='1') THEN
+						IF (last_DONE_O = '1' and DONE_O ='0') THEN
 							next_state <= address_strobe;
 						ELSE next_state <= config_wait;
 						END IF;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 						
 			WHEN address_strobe =>
-						next_state <= address_strobe_hold;		
+						next_state <= address_strobe_hold;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);	
+							count_next <= 0;	
 			
 			WHEN address_strobe_hold =>
 						next_state <= address_wait;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 			
 			WHEN address_wait =>
-						IF (DONE_O ='1') THEN
-							next_state <= stb_hold_wait;
-						ELSE next_state <= address_wait;
+						next_state <= read_msbyte_wait;
 							count_next <= 0;
-						END IF;	
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 
 			WHEN read_msbyte_wait =>
 						if (last_DONE_O = '1' and DONE_O ='0') THEN -- 
-							next_state <= stb_hold_wait;			
+							next_state <= read_msbyte;		
+						ELSE next_state <= read_msbyte_wait;
 						END IF;						
-			
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
+
+			WHEN read_msbyte =>
+							next_state <= stb_hold_wait;
+							next_DATA_OUT(15 downto 8) <= D_O(7 downto 0);
+							next_DATA_OUT(7 downto 0) <= current_DATA_OUT(7 downto 0);
+							count_next <= 0;
+						
 			WHEN stb_hold_wait =>
 						IF (count_last >= 510) THEN
-							next_state <= read_msbyte;
+							next_state <= read_lsbyte;
 							count_next <= 0;
 						ELSE next_state <= stb_hold_wait;
 							count_next <= count_last + 1;
 						END IF;
-						
-			WHEN read_msbyte =>
-							next_state <= read_lsbyte;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
 						
 			WHEN read_lsbyte =>
 						if (last_DONE_O = '1' and DONE_O ='0') THEN --last_DONE_O = '1' and 
-							next_state <= ready;
+							next_state <= read_lsbyte_latch;
 						ELSE next_state <= read_lsbyte;
 						END IF;			
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
+						
+			WHEN read_lsbyte_latch =>
+					next_state <= ready;
+							next_DATA_OUT(15 downto 8) <= current_DATA_OUT(15 downto 8);
+							next_DATA_OUT(7 downto 0) <= D_O(7 downto 0);
+							count_next <= 0;
 						
 			WHEN others =>
 						next_state <= ready;
+						next_DATA_OUT(15 downto 0) <= current_DATA_OUT(15 downto 0);
+							count_next <= 0;
 			
 			END CASE;
 			
@@ -151,9 +185,10 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 		
 	BEGIN
 		
+		DATA_OUT <= current_DATA_OUT;
+		
 		IF (RST = '1') THEN
 			SRST <= '1';
-			DATA_OUT <= null_2_byte;
 		ELSE SRST <= '0';
 		END IF;
 		
@@ -200,31 +235,35 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 						A_I 	<= 	addrAD2 & read_Bit;	
 						D_I 	<= 	writeCfg;
 			
-			WHEN stb_hold_wait =>
+			WHEN read_msbyte_wait =>
 						MSG_I <= 	'0';
 						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
 						D_I 	<= 	writeCfg;
-			
+
 			WHEN read_msbyte =>
 						MSG_I <= 	'0';
-						STB_I <=	'0';
+						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
 						D_I 	<= 	writeCfg;
-						DATA_OUT(15 downto 8) <= D_O;
-			
-			WHEN read_msbyte_wait =>
+
+			WHEN stb_hold_wait =>
 						MSG_I <= 	'0';
-						STB_I <=	'0';
+						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	writeCfg;
+						D_I 	<= 	writeCfg;						
 						
 			WHEN read_lsbyte =>
 						MSG_I <= 	'0';
 						STB_I <=	'0';
 						A_I 	<= 	addrAD2 & read_Bit;	
+						D_I 	<= 	writeCfg;						
+						
+			WHEN read_lsbyte_latch =>
+						MSG_I <= 	'0';
+						STB_I <=	'0';
+						A_I 	<= 	addrAD2 & read_Bit;	
 						D_I 	<= 	writeCfg;
-						DATA_OUT(7 downto 0) <= D_O;
 
 			END CASE;			
 			

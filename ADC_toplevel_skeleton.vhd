@@ -26,7 +26,7 @@ entity ADC_toplevel is
            AD2_SCL     : inout	STD_LOGIC;
            AD2_SDA     : inout	STD_LOGIC;
 					 debug			 : out STD_LOGIC;
-					 debug2			 : out STD_LOGIC;
+					 JA					 : out STD_LOGIC_VECTOR(7 downto 0);
            LED         : out	STD_LOGIC_VECTOR(15 downto 0);
            SCL_ALT_IN  : inout	STD_LOGIC;
            SDA_ALT_IN  : inout	STD_LOGIC);
@@ -45,6 +45,7 @@ architecture Structural of ADC_toplevel is
 	signal D_I_sig    : STD_LOGIC_VECTOR (7 downto 0);
 	signal D_O_sig    : STD_LOGIC_VECTOR (7 downto 0);
 	signal DATA_OUT_SIG : STD_LOGIC_VECTOR (15 downto 0);
+	signal DONE_O_DELAY_sig : STD_LOGIC;
 	signal state_debug_sig : STD_LOGIC_VECTOR (3 downto 0);
 	
 	signal COUNT_SIG						:integer range 0 to 510;
@@ -67,18 +68,26 @@ architecture Structural of ADC_toplevel is
 	SDA_ALT_IN <= 'Z';
 	SCL_ALT_IN <= 'Z';
 	debug <= DONE_O_sig;
+	JA <= D_O_SIG;
 	
-	process(state_debug_sig)
-	begin
-	debug2 <= start_sig; --NOT state_debug_sig(3) AND NOT state_debug_sig(2) AND state_debug_sig(1) and state_debug_sig(0);
-	end process;
-	
-	
+	--process(state_debug_sig)
+	--begin
+	--if (state_debug_sig = "1001") then
+	--		debug <= '1';
+	--		else debug <= '0';
+	--end if;
+	--if (state_debug_sig = "1011") then
+--			debug2 <= '1';
+	--		else debug2 <= '0';
+	--end if;
+		
+	--end process;
+		
 	-- CPU_RESETN input is active low, so we need to invert it
 	RESET_sig <= not CPU_RESETN;
-	LED(10 downto 0) <= DATA_OUT_SIG(10 downto 0);
-	LED (15 downto 12) <= state_debug_sig(3 downto 0);
-	LED(11) <= START_SIG;
+	LED(15 downto 0) <= DATA_OUT_SIG(15 downto 0);
+	--LED (15 downto 12) <= state_debug_sig(3 downto 0);
+	--LED(11) <= START_SIG;
     
 	-- We want to drive the outputs to the TWI interface like we have pull up resistors attached.
 	-- So when controller indicates we're high Z, attach the signal to a weak high signal instead.
@@ -105,7 +114,8 @@ architecture Structural of ADC_toplevel is
 								 DATA_OUT => DATA_OUT_SIG,
 								 start 	=>	START_SIG	,								
 								 Count	=>	COUNT_SIG,
-								 STATE_DEBUG => state_debug_sig
+								 STATE_DEBUG => state_debug_sig,
+								 DONE_O_DELAY_OUT => DONE_O_DELAY_sig
 								 );
 		
     TWI_DUT : entity work.TWICtl(Behavioral)

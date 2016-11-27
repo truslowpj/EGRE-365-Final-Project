@@ -31,6 +31,7 @@ architecture behavior of ADC_testbench is
   signal D_O_sig    : STD_LOGIC_VECTOR (7 downto 0);
 	signal START_SIG	:STD_LOGIC;
 	signal slave_rdy	: STD_LOGIC;
+	signal DONE_O_DELAY_sig : STD_LOGIC;
 	
 	signal STATE_DEBUG_SIG			:STD_LOGIC_VECTOR (3 downto 0);
 	signal COUNT_SIG						:integer range 0 to 510;
@@ -230,7 +231,8 @@ architecture behavior of ADC_testbench is
 								 DATA_OUT => LED_sig,
 								 start 	=>	START_SIG	,								
 								 Count	=>	COUNT_SIG,
-								 STATE_DEBUG => STATE_DEBUG_SIG
+								 STATE_DEBUG => STATE_DEBUG_SIG,
+								 DONE_O_DELAY_OUT => DONE_O_DELAY_sig
 								 );
 		
     TWI_DUT : entity work.TWICtl(Behavioral)

@@ -18,13 +18,13 @@ end delay_register;
 		process(clk, input)
 		begin
 		
-			if (rising_edge(clk)) THEN
-				--output <= outbox;
+			if (falling_edge(clk)) THEN
 				inbox <= input;
+				output <= outbox;
 			end if;
 			
-			if (falling_edge(clk)) THEN
-				output <= inbox;
+			if (rising_edge(clk)) THEN
+				outbox <= inbox;
 			end if;
 						
 		end process;
