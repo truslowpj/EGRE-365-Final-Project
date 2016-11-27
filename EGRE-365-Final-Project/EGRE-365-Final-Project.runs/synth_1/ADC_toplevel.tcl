@@ -3,7 +3,6 @@
 # 
 
 set_param xicom.use_bs_reader 1
-set_msg_config -id {Common 17-41} -limit 10000000
 set_msg_config -id {HDL 9-1061} -limit 100000
 set_msg_config -id {HDL 9-1654} -limit 100000
 create_project -in_memory -part xc7a100tcsg324-1
@@ -21,7 +20,7 @@ read_vhdl -library xil_defaultlib {
   C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/1_clk_delay_register.vhd
   C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/ADC_Controller_fsm.vhd
   C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/TWICtl.vhd
-  C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/clock_divider.vhd
+  C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/start_trigger.vhd
   C:/Users/peter/Documents/GitHub/EGRE-365-Final-Project/ADC_toplevel_skeleton.vhd
 }
 foreach dcp [get_files -quiet -all *.dcp] {

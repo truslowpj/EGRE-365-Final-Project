@@ -1,7 +1,7 @@
 Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2016.3 (win64) Build 1682563 Mon Oct 10 19:07:27 MDT 2016
-| Date             : Tue Nov 22 21:38:13 2016
+| Date             : Sat Nov 26 20:42:21 2016
 | Host             : laptop running 64-bit major release  (build 9200)
 | Command          : report_power -file ADC_toplevel_power_routed.rpt -pb ADC_toplevel_power_summary_routed.pb -rpx ADC_toplevel_power_routed.rpx
 | Design           : ADC_toplevel
@@ -30,8 +30,8 @@ Table of Contents
 ----------
 
 +--------------------------+--------+
-| Total On-Chip Power (W)  | 0.099  |
-| Dynamic (W)              | 0.002  |
+| Total On-Chip Power (W)  | 0.101  |
+| Dynamic (W)              | 0.003  |
 | Device Static (W)        | 0.097  |
 | Effective TJA (C/W)      | 4.6    |
 | Max Ambient (C)          | 84.5   |
@@ -50,16 +50,16 @@ Table of Contents
 | On-Chip        | Power (W) | Used     | Available | Utilization (%) |
 +----------------+-----------+----------+-----------+-----------------+
 | Clocks         |     0.001 |        3 |       --- |             --- |
-| Slice Logic    |    <0.001 |      405 |       --- |             --- |
-|   LUT as Logic |    <0.001 |      210 |     63400 |            0.33 |
+| Slice Logic    |    <0.001 |      414 |       --- |             --- |
+|   LUT as Logic |    <0.001 |      214 |     63400 |            0.34 |
 |   CARRY4       |    <0.001 |       25 |     15850 |            0.16 |
-|   Register     |    <0.001 |      153 |    126800 |            0.12 |
-|   F7/F8 Muxes  |    <0.001 |        1 |     63400 |           <0.01 |
-|   Others       |     0.000 |       11 |       --- |             --- |
-| Signals        |    <0.001 |      289 |       --- |             --- |
-| I/O            |    <0.001 |       20 |       210 |            9.52 |
+|   Register     |    <0.001 |      155 |    126800 |            0.12 |
+|   F7/F8 Muxes  |    <0.001 |        2 |     63400 |           <0.01 |
+|   Others       |     0.000 |       13 |       --- |             --- |
+| Signals        |    <0.001 |      291 |       --- |             --- |
+| I/O            |     0.002 |       22 |       210 |           10.48 |
 | Static Power   |     0.097 |          |           |                 |
-| Total          |     0.099 |          |           |                 |
+| Total          |     0.101 |          |           |                 |
 +----------------+-----------+----------+-----------+-----------------+
 
 
@@ -138,10 +138,11 @@ Table of Contents
 +----------------------+-----------+
 | Name                 | Power (W) |
 +----------------------+-----------+
-| ADC_toplevel         |     0.002 |
+| ADC_toplevel         |     0.003 |
 |   AD2_SCL_IOBUF_inst |     0.000 |
 |   AD2_SDA_IOBUF_inst |     0.000 |
 |   ADC_DUT            |    <0.001 |
+|     DONE_O_DELAY     |    <0.001 |
 |   DIVIDER            |    <0.001 |
 |   TWI_DUT            |     0.001 |
 +----------------------+-----------+

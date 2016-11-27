@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1479868523">
+<GenRun Id="impl_1" LaunchPart="xc7a100tcsg324-1" LaunchTime="1480210734">
   <File Type="PWROPT-DRC" Name="ADC_toplevel_drc_pwropted.rpt"/>
   <File Type="OPT-METHODOLOGY-DRC" Name="ADC_toplevel_methodology_drc_opted.rpt"/>
   <File Type="INIT-TIMING" Name="ADC_toplevel_timing_summary_init.rpt"/>
@@ -80,7 +80,7 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PPRDIR/../clock_divider.vhd">
+    <File Path="$PPRDIR/../start_trigger.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
@@ -88,6 +88,13 @@
     </File>
     <File Path="$PPRDIR/../ADC_toplevel_skeleton.vhd">
       <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../clock_divider.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
@@ -111,9 +118,7 @@
     </Config>
   </FileSet>
   <Strategy Version="1" Minor="2">
-    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2016">
-      <Desc>Default settings for Implementation.</Desc>
-    </StratHandle>
+    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2016"/>
     <Step Id="init_design"/>
     <Step Id="opt_design"/>
     <Step Id="power_opt_design"/>

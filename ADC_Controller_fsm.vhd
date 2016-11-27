@@ -119,7 +119,7 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count_last, last_DONE_O)
 						END IF;	
 
 			WHEN read_msbyte_wait =>
-						if (DONE_O ='1') THEN -- last_DONE_O = '1' and
+						if (last_DONE_O = '1' and DONE_O ='0') THEN -- 
 							next_state <= stb_hold_wait;			
 						END IF;						
 			
@@ -135,7 +135,7 @@ nextstate : PROCESS(current_state,START, ERR_O, DONE_O, count_last, last_DONE_O)
 							next_state <= read_lsbyte;
 						
 			WHEN read_lsbyte =>
-						if (DONE_O ='1') THEN --last_DONE_O = '1' and 
+						if (last_DONE_O = '1' and DONE_O ='0') THEN --last_DONE_O = '1' and 
 							next_state <= ready;
 						ELSE next_state <= read_lsbyte;
 						END IF;			
@@ -180,50 +180,50 @@ output_process : PROCESS(current_state, ERR_O, DONE_O, D_O, RST)
 						MSG_I <= 	'0';
 						STB_I <=	'0';
 						A_I 	<= 	addrAD2 & write_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 			
 			WHEN address_strobe =>
 						MSG_I <= 	'1';
 						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 			
 			WHEN address_strobe_hold =>
 						MSG_I <= 	'1';
 						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 			
 			WHEN address_wait =>
 						MSG_I <= 	'0';
 						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 			
 			WHEN stb_hold_wait =>
 						MSG_I <= 	'0';
 						STB_I <=	'1';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 			
 			WHEN read_msbyte =>
 						MSG_I <= 	'0';
 						STB_I <=	'0';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 						DATA_OUT(15 downto 8) <= D_O;
 			
 			WHEN read_msbyte_wait =>
 						MSG_I <= 	'0';
 						STB_I <=	'0';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 						
 			WHEN read_lsbyte =>
 						MSG_I <= 	'0';
 						STB_I <=	'0';
 						A_I 	<= 	addrAD2 & read_Bit;	
-						D_I 	<= 	null_byte;
+						D_I 	<= 	writeCfg;
 						DATA_OUT(7 downto 0) <= D_O;
 
 			END CASE;			

@@ -1,7 +1,7 @@
 Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 -----------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2016.3 (win64) Build 1682563 Mon Oct 10 19:07:27 MDT 2016
-| Date         : Tue Nov 22 21:37:03 2016
+| Date         : Sat Nov 26 20:40:42 2016
 | Host         : laptop running 64-bit major release  (build 9200)
 | Command      : report_control_sets -verbose -file ADC_toplevel_control_sets_placed.rpt
 | Design       : ADC_toplevel
@@ -22,8 +22,8 @@ Table of Contents
 +----------------------------------------------------------+-------+
 |                          Status                          | Count |
 +----------------------------------------------------------+-------+
-| Number of unique control sets                            |    11 |
-| Unused register locations in slices containing registers |    31 |
+| Number of unique control sets                            |    12 |
+| Unused register locations in slices containing registers |    37 |
 +----------------------------------------------------------+-------+
 
 
@@ -33,12 +33,12 @@ Table of Contents
 +--------------+-----------------------+------------------------+-----------------+--------------+
 | Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
 +--------------+-----------------------+------------------------+-----------------+--------------+
-| No           | No                    | No                     |              55 |           22 |
+| No           | No                    | No                     |              57 |           25 |
 | No           | No                    | Yes                    |               4 |            1 |
 | No           | Yes                   | No                     |              53 |           14 |
 | Yes          | No                    | No                     |               4 |            3 |
 | Yes          | No                    | Yes                    |               0 |            0 |
-| Yes          | Yes                   | No                     |              37 |           11 |
+| Yes          | Yes                   | No                     |              37 |            9 |
 +--------------+-----------------------+------------------------+-----------------+--------------+
 
 
@@ -48,15 +48,16 @@ Table of Contents
 +------------------------------------+---------------------------------------+-----------------------------+------------------+----------------+
 |            Clock Signal            |             Enable Signal             |       Set/Reset Signal      | Slice Load Count | Bel Load Count |
 +------------------------------------+---------------------------------------+-----------------------------+------------------+----------------+
+| ~SYS_CLK_IBUF_BUFG                 |                                       |                             |                1 |              1 |
 |  ADC_DUT/DATA_OUT_reg[10]_i_2_n_0  |                                       |                             |                1 |              3 |
-|  ADC_DUT/E[0]                      |                                       |                             |                1 |              4 |
+|  ADC_DUT/E[0]                      |                                       |                             |                2 |              4 |
 |  SYS_CLK_IBUF_BUFG                 |                                       | ADC_DUT/RESET_sig           |                1 |              4 |
 |  SYS_CLK_IBUF_BUFG                 | TWI_DUT/FSM_gray_state_reg[3]_i_1_n_0 |                             |                3 |              4 |
-|  SYS_CLK_IBUF_BUFG                 | TWI_DUT/dataByte[7]_i_2_n_0           | TWI_DUT/dataByte[7]_i_1_n_0 |                3 |              5 |
+|  SYS_CLK_IBUF_BUFG                 | TWI_DUT/dataByte[7]_i_2_n_0           | TWI_DUT/dataByte[7]_i_1_n_0 |                1 |              5 |
 |  ADC_DUT/DATA_OUT_reg[7]_i_2_n_0   |                                       |                             |                2 |              8 |
-|  ADC_DUT/count_next_reg[8]_i_2_n_0 |                                       |                             |                3 |              9 |
-|  SYS_CLK_IBUF_BUFG                 |                                       | DIVIDER/sclki               |                6 |             21 |
-|  SYS_CLK_IBUF_BUFG                 |                                       |                             |               15 |             31 |
+|  ADC_DUT/count_next_reg[8]_i_2_n_0 |                                       |                             |                4 |              9 |
+|  SYS_CLK_IBUF_BUFG                 |                                       | DIVIDER/count[21]_i_1_n_0   |                6 |             21 |
+|  SYS_CLK_IBUF_BUFG                 |                                       |                             |               15 |             32 |
 |  SYS_CLK_IBUF_BUFG                 |                                       | TWI_DUT/busFreeCnt0         |                8 |             32 |
 |  SYS_CLK_IBUF_BUFG                 | TWI_DUT/sclCnt[0]_i_2_n_0             | TWI_DUT/sclCnt0             |                8 |             32 |
 +------------------------------------+---------------------------------------+-----------------------------+------------------+----------------+
@@ -65,6 +66,7 @@ Table of Contents
 +--------+-----------------------+
 | Fanout | Number of ControlSets |
 +--------+-----------------------+
+| 1      |                     1 |
 | 3      |                     1 |
 | 4      |                     3 |
 | 5      |                     1 |

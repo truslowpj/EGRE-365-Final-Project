@@ -25,6 +25,8 @@ entity ADC_toplevel is
            SYS_CLK     : in		STD_LOGIC;
            AD2_SCL     : inout	STD_LOGIC;
            AD2_SDA     : inout	STD_LOGIC;
+					 debug			 : out STD_LOGIC;
+					 debug2			 : out STD_LOGIC;
            LED         : out	STD_LOGIC_VECTOR(15 downto 0);
            SCL_ALT_IN  : inout	STD_LOGIC;
            SDA_ALT_IN  : inout	STD_LOGIC);
@@ -64,7 +66,14 @@ architecture Structural of ADC_toplevel is
 	-- should still work.
 	SDA_ALT_IN <= 'Z';
 	SCL_ALT_IN <= 'Z';
-
+	debug <= DONE_O_sig;
+	
+	process(state_debug_sig)
+	begin
+	debug2 <= start_sig; --NOT state_debug_sig(3) AND NOT state_debug_sig(2) AND state_debug_sig(1) and state_debug_sig(0);
+	end process;
+	
+	
 	-- CPU_RESETN input is active low, so we need to invert it
 	RESET_sig <= not CPU_RESETN;
 	LED(10 downto 0) <= DATA_OUT_SIG(10 downto 0);
@@ -115,7 +124,7 @@ architecture Structural of ADC_toplevel is
                  SCL    => AD2_SCL   --TWI SCL
 								 
 );
-			DIVIDER : entity work.clock_divider(behavior)
+			DIVIDER : entity work.start_trigger(behavior)
 			generic map (Divisor => 5000000) 
 			port map (mclk => sys_clk,
 								sclk => START_SIG);
