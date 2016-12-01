@@ -16,6 +16,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- This is the library we need to include for the PULLUP components
 -- it should be automatically known to the Vivado tools
@@ -87,9 +89,130 @@ architecture Structural of ADC_toplevel is
 		
 	-- CPU_RESETN input is active low, so we need to invert it
 	RESET_sig <= not CPU_RESETN;
-	LED(15 downto 0) <= DATA_OUT_SIG(15 downto 0);
+	--LED(15 downto 0) <= DATA_OUT_SIG(15 downto 0);
+	
+	--LEd(0) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod 1) = 0 ELSE '1';
+	--LEd(1) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (1 * 256)) = 0 ELSE '1';
+	--LEd(2) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (2 * 256)) = 0 ELSE '1';
+	--LEd(3) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (13 * 256)) = 0 ELSE '1';
+	--LEd(4) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (14 * 256)) = 0 ELSE '1';
+	--LEd(5) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (15 * 256)) = 0 ELSE '1';
+	--LEd(6) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (16 * 256)) = 0 ELSE '1';
+	--LEd(7) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (17 * 256)) = 0 ELSE '1';
+	--LEd(8) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (18 * 256)) = 0 ELSE '1';
+	--LEd(9) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (19 * 256)) = 0 ELSE '1';
+	--LEd(10) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (10 * 256)) = 0 ELSE '1';
+	--LEd(11) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (11 * 256)) = 0 ELSE '1';
+	--LEd(12) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (12 * 256)) = 0 ELSE '1';
+	--LEd(13) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (13 * 256)) = 0 ELSE '1';
+	--LEd(14) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (14 * 256)) = 0 ELSE '1';
+	--LEd(15) <= '0' WHEN (to_integer(unsigned(DATA_OUT_SIG(15 downto 0))) mod (15 * 256)) = 0 ELSE '1';
+	
 	--LED (15 downto 12) <= state_debug_sig(3 downto 0);
 	--LED(11) <= START_SIG;
+    
+    PROCESS(DATA_OUT_SIG)
+    VARIABLE OUTPUT_VALUE : INTEGER := 0;
+    BEGIN
+        OUTPUT_VALUE := to_integer(unsigned(DATA_OUT_SIG(15 downto 0)));
+    
+        IF OUTPUT_VALUE > 0 THEN
+            LED(0) <= '1';
+        ELSE
+            LED(0) <= '0';
+        END IF;
+    
+        IF OUTPUT_VALUE > 256 THEN
+            LED(1) <= '1';
+        ELSE
+            LED(1) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 512 THEN
+            LED(2) <= '1';
+        ELSE
+            LED(2) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 768 THEN
+            LED(3) <= '1';
+        ELSE
+            LED(3) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 1024 THEN
+            LED(4) <= '1';
+        ELSE
+            LED(4) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 1280 THEN
+            LED(5) <= '1';
+        ELSE
+            LED(5) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 1536 THEN
+            LED(6) <= '1';
+        ELSE
+            LED(6) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 1792 THEN
+            LED(7) <= '1';
+        ELSE
+            LED(7) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 2048 THEN
+            LED(8) <= '1';
+        ELSE
+            LED(8) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 2304 THEN
+            LED(9) <= '1';
+        ELSE
+            LED(9) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 2560 THEN
+            LED(10) <= '1';
+        ELSE
+            LED(10) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 2816 THEN
+            LED(11) <= '1';
+        ELSE
+            LED(11) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 3072 THEN
+            LED(12) <= '1';
+        ELSE
+            LED(12) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 3328 THEN
+            LED(13) <= '1';
+        ELSE
+            LED(13) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 3584 THEN
+            LED(14) <= '1';
+        ELSE
+            LED(14) <= '0';
+        END IF;
+        
+        IF OUTPUT_VALUE > 3840 THEN
+            LED(15) <= '1';
+        ELSE
+            LED(15) <= '0';
+        END IF;
+                                                
+    END PROCESS;       
     
 	-- We want to drive the outputs to the TWI interface like we have pull up resistors attached.
 	-- So when controller indicates we're high Z, attach the signal to a weak high signal instead.
