@@ -1,3 +1,5 @@
+-- // klenke - peter
+
 -----------------------------------------------------------------------
 --  Inputs:
 --		CPU_RESETN	Main Reset Signal (active low)
